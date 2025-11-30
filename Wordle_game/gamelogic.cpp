@@ -259,7 +259,7 @@ void WordleGame::play() {
         }
         catch (const InvalidWordException& e) {
             SetCursorPosition(0, 12);
-            cout << "Error: " << e.what() << " Try again.\n";
+            cout << "Error occured: " << e.what() << " Try again.\n";
         }
     }
 
