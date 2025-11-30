@@ -529,7 +529,9 @@ slide
 slope  
 small  
 smart  
-smile  
+smile
+spawn
+shard  
 smoke  
 snack  
 snake  
