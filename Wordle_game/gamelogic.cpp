@@ -3,9 +3,8 @@
 #include "invalidWordException.h"
 #include <iostream>
 #include <map>
-
+#include <conio.h>
 #include <windows.h>
-#include <iostream>
 using namespace std;
 
 void printInstructions() {
@@ -51,6 +50,28 @@ void printInstructions() {
     SetColor(WHITE, BLACK);
     cout << " — the letter is not in the word.";
 }
+
+const char* pause = R"(
+______                    
+| ___ \                   
+| |_/ /_ _ _   _ ___  ___ 
+|  __/ _` | | | / __|/ _ \
+| | | (_| | |_| \__ \  __/
+\_|  \__,_|\__,_|___/\___|
+                          
+                                                
+)";
+
+const char* continuebutton = R"(
+______                               
+| ___ \                              
+| |_/ /___  ___ _   _ _ __ ___   ___ 
+|    // _ \/ __| | | | '_ ` _ \ / _ \
+| |\ \  __/\__ \ |_| | | | | | |  __/
+\_| \_\___||___/\__,_|_| |_| |_|\___|
+                                     
+                                                                              
+)";
 
 const char* youwon = R"(
 __   __                                
@@ -141,29 +162,58 @@ void WordleGame::printColored(const string& guess, int rowY) {
 
 void WordleGame::play() {
     ClearConsole();
-    SetCursorPosition(50, 50);
     printInstructions();
     attempts = 0;
+
     while (attempts < 6) {
         try {
             SetCursorPosition(50, 2);
             cout << "Attempts left: " << (6 - attempts) << "   ";
 
-            string guess;
             SetCursorPosition(0, 2 + attempts);
             cout << "Attempt #" << (attempts + 1) << ": ";
+
+            string guess;
+            bool escPressed = false;
+
+            while (true) {
+                if (_kbhit()) {
+                    int key = _getch();
+                    if (key == 27) {
+                        ClearConsole();
+                        cout << pause << endl;
+                        const char* escMenu[] = { continuebutton, returntomenu };
+                        int choice = ShowMenu(escMenu, 2, 20, 10);
+                        if (choice == 1) {
+                            ClearConsole();
+                            return;
+                        }
+                        else {
+                            ClearConsole();
+                            printInstructions();
+                            SetCursorPosition(0, 2 + attempts);
+                            cout << "Attempt #" << (attempts + 1) << ": ";
+                            continue;
+                        }
+                    }
+                    else {
+                        cin.putback((char)key);
+                        break;
+                    }
+                }
+            }
+
             cin >> guess;
 
             if (guess.size() != 5)
                 throw InvalidWordException("Word must be 5 letters!");
-
             if (!dict.contains(guess))
                 throw InvalidWordException("Word not in dictionary!");
 
             map<char, int> freq;
             for (char c : secret) freq[c]++;
-
             vector<int> colors(5, WHITE);
+
             for (int i = 0; i < 5; ++i) {
                 if (guess[i] == secret[i]) {
                     colors[i] = GREEN;
@@ -212,6 +262,7 @@ void WordleGame::play() {
             cout << "Error: " << e.what() << " Try again.\n";
         }
     }
+
     ClearConsole();
     cout << gameover << endl;
     SetCursorPosition(5, 9);
